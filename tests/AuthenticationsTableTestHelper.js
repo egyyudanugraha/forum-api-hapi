@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 const pool = require('../src/Infrastructures/database/postgres/pool');
 
 const AuthenticationsTableTestHelper = {
@@ -21,7 +22,7 @@ const AuthenticationsTableTestHelper = {
   },
 
   async cleanTable() {
-    await pool.query('TRUNCATE TABLE authentications');
+    await pool.query('DELETE FROM authentications WHERE 1=1');
   },
 };
 
