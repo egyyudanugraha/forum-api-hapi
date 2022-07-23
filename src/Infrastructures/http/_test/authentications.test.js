@@ -5,7 +5,7 @@ const container = require('../../container');
 const createServer = require('../createServer');
 const AuthenticationTokenManager = require('../../../Applications/security/AuthenticationTokenManager');
 
-describe('/authentications endpoint', () => {
+xdescribe('/authentications endpoint', () => {
   afterAll(async () => {
     await pool.end();
   });
