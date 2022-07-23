@@ -22,6 +22,16 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     const result = await this._pool.query(query);
     return new AddedThread({ ...result.rows[0] });
   }
+
+  async getThread(id) {
+    const query = {
+      text: 'SELECT * FROM threads WHERE id = $1',
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+    return result.rows[0];
+  }
 }
 
 module.exports = ThreadRepositoryPostgres;

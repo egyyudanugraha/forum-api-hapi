@@ -38,7 +38,7 @@ describe('/threads endpoint', () => {
         url: '/authentications',
         payload: requestPayload,
       });
-      const { accessToken } = user.result.data;
+      const { accessToken } = await user.result.data;
       const { id } = addUser.result.data.addedUser;
 
       // Action
