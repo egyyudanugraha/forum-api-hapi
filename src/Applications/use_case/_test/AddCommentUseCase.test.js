@@ -57,9 +57,9 @@ describe('AddCommentUseCase', () => {
   it('should orchestrating the add comment action correctly', async () => {
     // Arrange
     await UsersTableTestHelper.addUser({ id: 'user-222', username: 'testaddcomment' });
-    await ThreadTableTestHelper.addThread({ id: 'thread-123', title: 'thread title', owner: 'user-222' });
+    await ThreadTableTestHelper.addThread({ id: 'thread-123-xx', title: 'thread title', owner: 'user-222' });
     const useCasePayload = {
-      threadId: 'thread-123',
+      threadId: 'thread-123-xx',
       content: 'some content',
     };
     const useCasePayloadComment = new AddComment({
@@ -79,7 +79,7 @@ describe('AddCommentUseCase', () => {
     mockCommentRepository.addComment = jest.fn()
       .mockImplementation(() => Promise.resolve(expecttedComment));
     mockThreadRepository.checkThreadById = jest.fn()
-      .mockImplementation(() => Promise.resolve({ id: 'thread-123' }));
+      .mockImplementation(() => Promise.resolve({ id: 'thread-123-xx' }));
 
     /** creating use case instance */
     const getCommentUseCase = new AddCommentUseCase({

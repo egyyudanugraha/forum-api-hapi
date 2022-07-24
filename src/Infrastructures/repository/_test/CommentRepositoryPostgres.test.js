@@ -55,4 +55,57 @@ describe('CommentRepository postgres', () => {
       }));
     });
   });
+
+  describe('findCommentById function', () => {
+    it('should return undefined if comment not found', async () => {
+      const commentRepository = new CommentRepositoryPostgres(pool);
+      const comment = await commentRepository.findCommentById('comment-123');
+
+      expect(comment).toBeUndefined();
+    });
+
+    it('should return comment correctly', async () => {
+      await UsersTableTestHelper.addUser({ id: 'user-comment-345', username: 'usercomment345' });
+      await ThreadTableTestHelper.addThread({ id: 'thread-comment-345', title: 'thread title', owner: 'user-comment-345' });
+      await CommentTableTestHelper.addComment({
+        id: 'comment-345',
+        content: 'comment content',
+        threadId: 'thread-comment-345',
+        userId: 'user-comment-345',
+      });
+
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+      const comment = await commentRepositoryPostgres.findCommentById('comment-345');
+
+      expect(comment).toStrictEqual({ id: 'comment-345', owner: 'user-comment-345' });
+    });
+  });
+
+  describe('deleteComment function', () => {
+    it('should delete comment', async () => {
+      await UsersTableTestHelper.addUser({ id: 'user-comment-567', username: 'usercomment567' });
+      await ThreadTableTestHelper.addThread({ id: 'thread-comment-567', title: 'thread title', owner: 'user-comment-567' });
+      await CommentTableTestHelper.addComment({
+        id: 'comment-567',
+        content: 'comment content',
+        threadId: 'thread-comment-567',
+        userId: 'user-comment-567',
+      });
+
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+      await commentRepositoryPostgres.deleteComment('comment-567');
+
+      const comments = await CommentTableTestHelper.findComment('comment-567');
+      expect(comments).toStrictEqual([
+        {
+          id: 'comment-567',
+          content: 'comment content',
+          thread_id: 'thread-comment-567',
+          owner: 'user-comment-567',
+          date: expect.any(String),
+          is_delete: true,
+        },
+      ]);
+    });
+  });
 });

@@ -34,7 +34,8 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     };
 
     const queryComments = {
-      text: `SELECT comment_threads.id, comment_threads.content, comment_threads.date, users.username
+      text: `SELECT comment_threads.id, comment_threads.content, 
+      comment_threads.date, comment_threads.is_delete, users.username
       FROM comment_threads
       LEFT JOIN users ON comment_threads.owner = users.id
       WHERE comment_threads.thread_id = $1
@@ -42,10 +43,24 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       values: [id],
     };
 
-    const threads = await this._pool.query(queryThread);
-    const comments = await this._pool.query(queryComments);
+    const queryReplies = {
+      text: `SELECT replies.*, users.username
+      FROM replies
+      LEFT JOIN users ON replies.owner = users.id
+      WHERE 1=1`,
+    };
 
-    return mapThreadComments(threads.rows[0], comments.rows);
+    const [thread, comments, replies] = await Promise.all([
+      this._pool.query(queryThread),
+      this._pool.query(queryComments),
+      this._pool.query(queryReplies),
+    ]);
+
+    return mapThreadComments({
+      thread: thread.rows[0],
+      comments: comments.rows,
+      replies: replies.rows,
+    });
   }
 
   async checkThreadById(id) {

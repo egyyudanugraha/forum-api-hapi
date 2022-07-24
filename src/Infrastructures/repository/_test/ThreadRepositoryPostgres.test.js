@@ -17,7 +17,7 @@ describe('ThreadRepository postgres', () => {
   describe('addThread function', () => {
     it('should persist add thread', async () => {
       await UsersTableTestHelper.addUser({ id: 'user-thread-123', username: 'userthread' });
-      const fakeIdGenerator = () => '123'; // stub
+      const fakeIdGenerator = () => 'xx1233'; // stub
       const threadRepository = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
       const threadPayload = {
         title: 'thread title',
@@ -27,9 +27,9 @@ describe('ThreadRepository postgres', () => {
 
       await threadRepository.addThread(threadPayload);
 
-      const threads = await ThreadTableTestHelper.findThread('thread-123');
+      const threads = await ThreadTableTestHelper.findThread('thread-xx1233');
       expect(threads).toHaveLength(1);
-      expect(threads[0].id).toBe('thread-123');
+      expect(threads[0].id).toBe('thread-xx1233');
     });
 
     it('should return added thread correctly', async () => {

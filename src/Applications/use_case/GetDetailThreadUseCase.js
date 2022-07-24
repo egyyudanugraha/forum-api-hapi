@@ -17,17 +17,17 @@ class GetDetailThreadUseCase {
     const { threadId } = payload;
 
     if (!threadId) {
-      throw new Error('ADD_COMMENT_USE_CASE.NOT_CONTAIN_THREAD_ID');
+      throw new Error('GET_DETAIL_THREAD_USE_CASE.NOT_CONTAIN_THREAD_ID');
     }
 
     if (typeof threadId !== 'string') {
-      throw new Error('ADD_COMMENT_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION');
+      throw new Error('GET_DETAIL_THREAD_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION');
     }
 
     const result = await this._threadRepository.checkThreadById(threadId);
 
     if (!result) {
-      throw new Error('ADD_COMMENT_USE_CASE.THREAD_NOT_FOUND');
+      throw new Error('GET_DETAIL_THREAD_USE_CASE.THREAD_NOT_FOUND');
     }
   }
 }

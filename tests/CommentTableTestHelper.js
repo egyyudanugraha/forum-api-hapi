@@ -1,7 +1,7 @@
 /* instanbul ignore file */
 const pool = require('../src/Infrastructures/database/postgres/pool');
 
-const CommentRepositoryTableTestHelper = {
+const CommentTableTestHelper = {
   async addComment({
     id = 'comment-123',
     threadId,
@@ -32,4 +32,4 @@ const CommentRepositoryTableTestHelper = {
   },
 };
 
-module.exports = CommentRepositoryTableTestHelper;
+module.exports = CommentTableTestHelper;

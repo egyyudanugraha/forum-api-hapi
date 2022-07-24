@@ -6,7 +6,7 @@ const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const GetThread = require('../../../Domains/threads/entities/GetThread');
 
 describe('GetDetailThreadUseCase', () => {
-  xit('should throw error if use case thread id not found', () => {
+  it('should throw error if use case thread id not found', () => {
     // Arrange
     const useCasePayload = {
       threadId: 'threadId',
@@ -16,6 +16,8 @@ describe('GetDetailThreadUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
 
     /** mocking needed function */
+    mockThreadRepository.checkThreadById = jest.fn()
+      .mockImplementation(() => Promise.resolve(null));
     mockThreadRepository.getDetailThreadById = jest.fn()
       .mockImplementation(() => Promise.resolve(null));
 
@@ -35,7 +37,7 @@ describe('GetDetailThreadUseCase', () => {
     await ThreadTableTestHelper.addThread({
       id: 'thread-xxx', owner: 'user-xxx', title: 'thread title', body: 'thread body',
     });
-    await CommentTableTestHelper.addComment({ id: 'comment-xxx', threadId: 'thread-xxx', userId: 'user-xxx' });
+    await CommentTableTestHelper.addComment({ id: 'comment-xxx-xx', threadId: 'thread-xxx', userId: 'user-xxx' });
 
     const useCasePayload = {
       threadId: 'thread-xxx',
@@ -48,7 +50,7 @@ describe('GetDetailThreadUseCase', () => {
       username: 'user-thread-xxx',
       comments: [
         {
-          id: 'comment-xxx',
+          id: 'comment-xxx-xx',
           content: 'comment content',
           date: expect.any(String),
           username: 'user-thread-xxx',
