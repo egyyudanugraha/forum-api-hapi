@@ -1,17 +1,16 @@
-const AddComment = require('../../Domains/comments/entities/AddComment');
+const GetThread = require('../../Domains/threads/entities/GetThread');
 
-class AddCommentUseCase {
-  constructor({ commentRepository, threadRepository }) {
-    this._commentRepository = commentRepository;
+class GetDetailThreadUseCase {
+  constructor({ threadRepository }) {
     this._threadRepository = threadRepository;
   }
 
   async execute(payload) {
     await this._verifyPayload(payload);
-    const { content, threadId, owner } = payload;
+    const { threadId } = payload;
 
-    const addComment = new AddComment({ content });
-    return this._commentRepository.addComment({ ...addComment, threadId, owner });
+    const result = await this._threadRepository.getDetailThreadById(threadId);
+    return new GetThread(result);
   }
 
   async _verifyPayload(payload) {
@@ -33,4 +32,4 @@ class AddCommentUseCase {
   }
 }
 
-module.exports = AddCommentUseCase;
+module.exports = GetDetailThreadUseCase;
