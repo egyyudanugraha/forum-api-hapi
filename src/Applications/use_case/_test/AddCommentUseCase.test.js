@@ -5,8 +5,15 @@ const AddedComment = require('../../../Domains/comments/entities/AddedComment');
 const AddCommentUseCase = require('../AddCommentUseCase');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const ThreadTableTestHelper = require('../../../../tests/ThreadTableTestHelper');
+const CommentTableTestHelper = require('../../../../tests/CommentTableTestHelper');
 
 describe('AddCommentUseCase', () => {
+  afterEach(async () => {
+    await ThreadTableTestHelper.cleanTable();
+    await CommentTableTestHelper.cleanTable();
+    await UsersTableTestHelper.cleanTable();
+  });
+
   it('should throw error if use case not contain param thread id', () => {
     // Arrange
     const useCasePayload = {};

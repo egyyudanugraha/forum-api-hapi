@@ -3,8 +3,13 @@ const AddedThread = require('../../../Domains/threads/entities/AddedThread');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const AddThreadUseCase = require('../AddThreadUseCase');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
+const ThreadRepositoryTableTestHelper = require('../../../../tests/ThreadTableTestHelper');
 
 describe('AddThreadUseCase', () => {
+  afterEach(async () => {
+    await ThreadRepositoryTableTestHelper.cleanTable();
+  });
+
   it('should orchestrating the add thread action correctly', async () => {
     // Arrange
     await UsersTableTestHelper.addUser({ id: 'user-232', username: 'testaddthread' });

@@ -119,4 +119,32 @@ describe('ReplyRepository postgres', () => {
       ]);
     });
   });
+
+  describe('deleteReply function', () => {
+    it('should delete reply', async () => {
+      await UsersTableTestHelper.addUser({ id: 'user-reply-231', username: 'userreplies' });
+      await ThreadTableTestHelper.addThread({ id: 'thread-reply-23', title: 'thread title', owner: 'user-reply-231' });
+      await CommentTableTestHelper.addComment({
+        id: 'comment-reply-23', content: 'comment content', threadId: 'thread-reply-23', userId: 'user-reply-231',
+      });
+      await ReplyTableTestHelper.addReply({
+        id: 'reply-23', content: 'reply content', commentId: 'comment-reply-23', userId: 'user-reply-231',
+      });
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+      await replyRepositoryPostgres.deleteReply('reply-23');
+
+      const replies = await ReplyTableTestHelper.findReply('reply-23');
+      expect(replies).toStrictEqual([
+        {
+          id: 'reply-23',
+          content: 'reply content',
+          owner: 'user-reply-231',
+          comment_id: 'comment-reply-23',
+          date: expect.any(String),
+          is_delete: true,
+        },
+      ]);
+    });
+  });
 });

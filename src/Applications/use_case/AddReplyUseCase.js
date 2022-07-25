@@ -18,11 +18,11 @@ class AddReplyUseCase {
   async _verifyPayload(payload) {
     const { commentId, threadId, content } = payload;
 
-    if (!content) {
+    if (!content || !threadId || !commentId) {
       throw new Error('ADD_REPLY_USE_CASE.NOT_CONTAIN_CONTENT');
     }
 
-    if (typeof commentId !== 'string' || typeof threadId !== 'string') {
+    if (typeof commentId !== 'string' || typeof threadId !== 'string' || typeof content !== 'string') {
       throw new Error('ADD_REPLY_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION');
     }
 

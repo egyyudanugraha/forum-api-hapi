@@ -6,6 +6,12 @@ const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const GetThread = require('../../../Domains/threads/entities/GetThread');
 
 describe('GetDetailThreadUseCase', () => {
+  afterEach(async () => {
+    await ThreadTableTestHelper.cleanTable();
+    await CommentTableTestHelper.cleanTable();
+    await UsersTableTestHelper.cleanTable();
+  });
+
   it('should throw error if use case thread id not found', () => {
     // Arrange
     const useCasePayload = {

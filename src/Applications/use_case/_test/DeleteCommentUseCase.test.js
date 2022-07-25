@@ -5,6 +5,12 @@ const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const ThreadTableTestHelper = require('../../../../tests/ThreadTableTestHelper');
 
 describe('DeleteCommentUseCase', () => {
+  afterEach(async () => {
+    await CommentTableTestHelper.cleanTable();
+    await UsersTableTestHelper.cleanTable();
+    await ThreadTableTestHelper.cleanTable();
+  });
+
   it('should throw error if use case params not contain comment id', async () => {
     // Arrange
     const useCaseParams = {};

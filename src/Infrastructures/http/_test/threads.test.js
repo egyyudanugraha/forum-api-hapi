@@ -5,7 +5,7 @@ const CommentTableTestHelper = require('../../../../tests/CommentTableTestHelper
 const container = require('../../container');
 const createServer = require('../createServer');
 
-xdescribe('/threads endpoint', () => {
+describe('/threads endpoint', () => {
   afterAll(async () => {
     await pool.end();
   });

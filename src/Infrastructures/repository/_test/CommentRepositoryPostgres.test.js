@@ -20,7 +20,7 @@ describe('CommentRepository postgres', () => {
     it('should persist add comment', async () => {
       await UsersTableTestHelper.addUser({ id: 'user-comment-123', username: 'usercomment' });
       await ThreadTableTestHelper.addThread({ id: 'thread-comment-123', title: 'thread title', owner: 'user-comment-123' });
-      const fakeIdGenerator = () => '123'; // stub
+      const fakeIdGenerator = () => 'test-123'; // stub
       const commentRepository = new CommentRepositoryPostgres(pool, fakeIdGenerator);
       const commentPayload = {
         content: 'comment content',
@@ -30,9 +30,9 @@ describe('CommentRepository postgres', () => {
 
       await commentRepository.addComment(commentPayload);
 
-      const comments = await CommentTableTestHelper.findComment('comment-123');
+      const comments = await CommentTableTestHelper.findComment('comment-test-123');
       expect(comments).toHaveLength(1);
-      expect(comments[0].id).toBe('comment-123');
+      expect(comments[0].id).toBe('comment-test-123');
     });
 
     it('should return added comment correctly', async () => {

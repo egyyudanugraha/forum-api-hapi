@@ -5,7 +5,7 @@ const CommentTableTestHelper = require('../../../../tests/CommentTableTestHelper
 const container = require('../../container');
 const createServer = require('../createServer');
 
-xdescribe('/threads/{id}/comments endpoint', () => {
+describe('/threads/{id}/comments endpoint', () => {
   afterAll(async () => {
     await pool.end();
   });
@@ -20,21 +20,21 @@ xdescribe('/threads/{id}/comments endpoint', () => {
     it('should response 401 and persisted comment without authentication', async () => {
       // Arrange
       await UsersTableTestHelper.addUser({
-        username: 'user-xx-xx',
-        id: 'user-xx-xx',
+        username: 'usernameforcomment',
+        id: 'user-0000',
       });
       await ThreadTableTestHelper.addThread({
-        id: 'thread-xx-xx',
+        id: 'thread-1221',
         title: 'thread title',
         body: 'thread body',
-        owner: 'user-xx-xx',
+        owner: 'user-0000',
       });
       const server = await createServer(container);
 
       // Action
       const response = await server.inject({
         method: 'POST',
-        url: '/threads/thread-xx-xx/comments',
+        url: '/threads/thread-1221/comments',
         payload: {
           content: 'comment content',
         },
@@ -202,27 +202,27 @@ xdescribe('/threads/{id}/comments endpoint', () => {
     it('should response 401 and persisted comment without authentication', async () => {
       // Arrange
       await UsersTableTestHelper.addUser({
-        username: 'user-example-xx',
-        id: 'user-example-xx',
+        username: 'userforcommentexample',
+        id: 'user-0001',
       });
       await ThreadTableTestHelper.addThread({
-        id: 'thread-example-xx',
+        id: 'thread-0000',
         title: 'thread title',
         body: 'thread body',
-        owner: 'user-example-xx',
+        owner: 'user-0001',
       });
       await CommentTableTestHelper.addComment({
-        id: 'comment-xx-xx',
+        id: 'comment-0000',
         content: 'comment content',
-        owner: 'user-example-xx',
-        thread: 'thread-example-xx',
+        userId: 'user-0001',
+        threadId: 'thread-0000',
       });
       const server = await createServer(container);
 
       // Action
       const response = await server.inject({
         method: 'DELETE',
-        url: '/threads/thread-example-xx/comments/comment-xx-xx',
+        url: '/threads/thread-0000/comments/comment-0000',
       });
 
       // Assert
@@ -276,39 +276,45 @@ xdescribe('/threads/{id}/comments endpoint', () => {
       // Arrange
       const server = await createServer(container);
       // add user
-      await UsersTableTestHelper.addUser({
-        username: 'user-example-xx',
-        id: 'dicodingindonesia',
+      const users = await server.inject({
+        method: 'POST',
+        url: '/users',
+        payload: {
+          username: 'userforcommentexample3',
+          password: 'secret',
+          fullname: 'Dicoding Indonesia',
+        },
+      });
+      const userId = await users.result.data.addedUser.id;
+      // add thread
+      await ThreadTableTestHelper.addThread({
+        id: 'thread-0003',
+        title: 'thread title',
+        body: 'thread body',
+        owner: userId,
       });
       // login user
       const user = await server.inject({
         method: 'POST',
         url: '/authentications',
         payload: {
-          username: 'dicodingindonesia',
+          username: 'userforcommentexample3',
           password: 'secret',
         },
       });
       const { accessToken } = await user.result.data;
-      // add thread
-      await ThreadTableTestHelper.addThread({
-        id: 'thread-xx-xx',
-        title: 'thread title',
-        body: 'thread body',
-        owner: 'dicodingindonesia',
-      });
       // add comment
       await CommentTableTestHelper.addComment({
-        id: 'comment-xx-xx',
+        id: 'comment-0003',
         content: 'comment content',
-        owner: 'dicodingindonesia',
-        thread: 'thread-xx-xx',
+        userId,
+        threadId: 'thread-0003',
       });
 
       // Action
       const response = await server.inject({
         method: 'DELETE',
-        url: '/threads/thread-xx-xx/comments/comment-xx-xx',
+        url: '/threads/thread-0003/comments/comment-0003',
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
