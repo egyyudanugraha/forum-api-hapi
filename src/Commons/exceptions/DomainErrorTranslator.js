@@ -43,7 +43,7 @@ DomainErrorTranslator._directories = {
   'ADD_REPLY.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('isi reply harus string'),
   'ADDED_REPLY.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('harus mengirimkan id, content, tanggal, dan user id'),
   'ADDED_REPLY.NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('id, content, tanggal, dan user id harus string'),
-  'ADD_REPLY_USE_CASE.NOT_CONTAIN_CONTENT': new InvariantError('harus mengirimkan content'),
+  'ADD_REPLY_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY': new InvariantError('harus mengirimkan content'),
   'ADD_REPLY_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION': new InvariantError('content harus string'),
   'ADD_REPLY_USE_CASE.THREAD_NOT_FOUND': new NotFoundError('thread tidak ditemukan'),
   'ADD_REPLY_USE_CASE.COMMENT_NOT_FOUND': new NotFoundError('comment tidak ditemukan'),

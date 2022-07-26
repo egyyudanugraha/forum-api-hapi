@@ -80,12 +80,11 @@ describe('ThreadRepository postgres', () => {
 
   describe('getDetailThreadById function', () => {
     it('should return null if thread not found', async () => {
-      const fakeIdGenerator = () => '1234'; // stub
-      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
-      const thread = await threadRepositoryPostgres.getDetailThreadById('thread-1234');
+      const thread = await threadRepositoryPostgres.getDetailThreadById('thread-123');
 
-      expect(thread).toBeNull();
+      expect(thread).toBeUndefined();
     });
 
     it('should return detail thread by id', async () => {
@@ -100,14 +99,13 @@ describe('ThreadRepository postgres', () => {
 
       const thread = await threadRepository.getDetailThreadById('thread-290');
 
-      expect(thread).not.toBeNull();
-      expect(thread).toEqual({
+      expect(thread).not.toBeUndefined();
+      expect(thread).toStrictEqual({
         id: 'thread-290',
         title: 'thread title',
         body: 'thread body',
         username: 'userthrea2',
         date: expect.any(String),
-        comments: [],
       });
     });
   });

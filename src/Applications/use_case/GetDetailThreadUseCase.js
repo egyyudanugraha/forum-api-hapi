@@ -1,15 +1,20 @@
 const GetThread = require('../../Domains/threads/entities/GetThread');
 
 class GetDetailThreadUseCase {
-  constructor({ threadRepository }) {
+  constructor({ threadRepository, commentRepository, replyRepository }) {
     this._threadRepository = threadRepository;
+    this._commentRepository = commentRepository;
+    this._replyRepository = replyRepository;
   }
 
   async execute(payload) {
     await this._verifyPayload(payload);
     const { threadId } = payload;
 
-    const result = await this._threadRepository.getDetailThreadById(threadId);
+    const thread = await this._threadRepository.getDetailThreadById(threadId);
+    const comments = await this._commentRepository.findCommentByThreadId(threadId);
+    const result = await this._combineTheradWithCommentReplies({ thread, comments });
+
     return new GetThread(result);
   }
 
@@ -29,6 +34,32 @@ class GetDetailThreadUseCase {
     if (!result) {
       throw new Error('GET_DETAIL_THREAD_USE_CASE.THREAD_NOT_FOUND');
     }
+  }
+
+  async _combineTheradWithCommentReplies({ thread, comments }) {
+    return {
+      ...thread,
+      comments: await Promise.all(this._commentsMapping(comments)),
+    };
+  }
+
+  _repliesMapping(replies) {
+    return replies.map((reply) => ({
+      id: reply.id,
+      content: reply.is_delete ? '**balasan telah dihapus**' : reply.content,
+      date: reply.date,
+      username: reply.username,
+    }));
+  }
+
+  _commentsMapping(comments) {
+    return comments.map(async (comment) => ({
+      id: comment.id,
+      content: comment.is_delete ? '**komentar telah dihapus**' : comment.content,
+      date: comment.date,
+      username: comment.username,
+      replies: this._repliesMapping(await this._replyRepository.findReplyByCommentId(comment.id)),
+    }));
   }
 }
 

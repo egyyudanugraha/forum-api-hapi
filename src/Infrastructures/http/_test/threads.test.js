@@ -2,6 +2,7 @@ const pool = require('../../database/postgres/pool');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const ThreadTableTestHelper = require('../../../../tests/ThreadTableTestHelper');
 const CommentTableTestHelper = require('../../../../tests/CommentTableTestHelper');
+const ReplyTableTestHelper = require('../../../../tests/ReplyTableTestHelper');
 const container = require('../../container');
 const createServer = require('../createServer');
 
@@ -83,6 +84,12 @@ describe('/threads endpoint', () => {
         threadId: 'thread-xx-122',
         userId: 'dicodingcom-id',
       });
+      await ReplyTableTestHelper.addReply({
+        id: 'reply-xx-122',
+        content: 'reply content',
+        commentId: 'comment-xx-122',
+        userId: 'dicodingcom-id',
+      });
       const server = await createServer(container);
 
       // Action
@@ -103,6 +110,8 @@ describe('/threads endpoint', () => {
       await expect(responseJson.data.thread.comments[0].id).toEqual('comment-xx-122');
       await expect(responseJson.data.thread.comments[0].content).toEqual('comment content');
       await expect(responseJson.data.thread.comments[0].username).toEqual('dicodingcom');
+      await expect(responseJson.data.thread.comments[0].replies).toBeDefined();
+      await expect(responseJson.data.thread.comments[0].replies.length).toEqual(1);
     });
   });
 });

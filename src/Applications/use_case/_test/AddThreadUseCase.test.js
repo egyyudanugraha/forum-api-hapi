@@ -2,24 +2,18 @@ const AddThread = require('../../../Domains/threads/entities/AddThread');
 const AddedThread = require('../../../Domains/threads/entities/AddedThread');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const AddThreadUseCase = require('../AddThreadUseCase');
-const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
-const ThreadRepositoryTableTestHelper = require('../../../../tests/ThreadTableTestHelper');
 
 describe('AddThreadUseCase', () => {
-  afterEach(async () => {
-    await ThreadRepositoryTableTestHelper.cleanTable();
-  });
-
   it('should orchestrating the add thread action correctly', async () => {
     // Arrange
-    await UsersTableTestHelper.addUser({ id: 'user-232', username: 'testaddthread' });
     const useCasePayload = new AddThread({
-      title: 'thread title',
-      body: 'thread body',
+      title: 'title',
+      body: 'body',
+      owner: 'user-222',
     });
     const expecttedThread = new AddedThread({
       id: 'thread-123',
-      title: useCasePayload.title,
+      title: 'title thread',
       owner: 'user-232',
     });
 
@@ -28,7 +22,11 @@ describe('AddThreadUseCase', () => {
 
     /** mocking needed function */
     mockThreadRepository.addThread = jest.fn()
-      .mockImplementation(() => Promise.resolve(expecttedThread));
+      .mockImplementation(() => Promise.resolve(new AddedThread({
+        id: 'thread-123',
+        title: 'title thread',
+        owner: 'user-232',
+      })));
 
     /** creating use case instance */
     const getThreadUseCase = new AddThreadUseCase({

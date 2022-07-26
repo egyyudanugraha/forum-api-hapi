@@ -19,7 +19,7 @@ class AddReplyUseCase {
     const { commentId, threadId, content } = payload;
 
     if (!content || !threadId || !commentId) {
-      throw new Error('ADD_REPLY_USE_CASE.NOT_CONTAIN_CONTENT');
+      throw new Error('ADD_REPLY_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY');
     }
 
     if (typeof commentId !== 'string' || typeof threadId !== 'string' || typeof content !== 'string') {

@@ -1,16 +1,7 @@
 const DeleteCommentUseCase = require('../DeleteCommentUseCase');
 const CommentRepository = require('../../../Domains/comments/CommentRepository');
-const CommentTableTestHelper = require('../../../../tests/CommentTableTestHelper');
-const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
-const ThreadTableTestHelper = require('../../../../tests/ThreadTableTestHelper');
 
 describe('DeleteCommentUseCase', () => {
-  afterEach(async () => {
-    await CommentTableTestHelper.cleanTable();
-    await UsersTableTestHelper.cleanTable();
-    await ThreadTableTestHelper.cleanTable();
-  });
-
   it('should throw error if use case params not contain comment id', async () => {
     // Arrange
     const useCaseParams = {};
@@ -40,7 +31,7 @@ describe('DeleteCommentUseCase', () => {
     };
     const mockCommentRepository = new CommentRepository();
     mockCommentRepository.findCommentById = jest.fn()
-      .mockImplementation(() => Promise.resolve(null));
+      .mockImplementation(() => Promise.resolve());
 
     // Action & Assert
     await expect(new DeleteCommentUseCase({
@@ -48,37 +39,30 @@ describe('DeleteCommentUseCase', () => {
     }).execute(useCaseParams))
       .rejects
       .toThrowError('DELETE_COMMENT_USE_CASE.COMMENT_NOT_FOUND');
+    expect(mockCommentRepository.findCommentById).toHaveBeenCalledWith('commentId');
   });
 
   it('should throw error if comment not owner of comment', async () => {
-    await UsersTableTestHelper.addUser({ username: 'usernamecommentdel', id: 'commentdel' });
-    await ThreadTableTestHelper.addThread({ id: 'threaddel', owner: 'commentdel' });
-    await CommentTableTestHelper.addComment({ id: 'commentdel', userId: 'commentdel', threadId: 'threaddel' });
     // Arrange
     const useCaseParams = {
       commentId: 'commentdel',
-      owner: 'user-12333',
+      owner: 'user-333',
     };
     const mockCommentRepository = new CommentRepository();
     mockCommentRepository.findCommentById = jest.fn()
-      .mockImplementation(() => Promise.resolve({ owner: 'commentdel' }));
-    mockCommentRepository.deleteComment = jest.fn()
-      .mockImplementation(() => Promise.resolve());
+      .mockImplementation(() => Promise.resolve({ id: 'commentdel', owner: 'user-123321' }));
 
-    // Action
-    const result = new DeleteCommentUseCase({
+    // Action & Assert
+    await expect(new DeleteCommentUseCase({
       commentRepository: mockCommentRepository,
-    }).execute(useCaseParams);
-
-    // Assert
-    expect(result).rejects.toThrowError('DELETE_COMMENT_USE_CASE.COMMENT_NOT_OWNER');
+    }).execute(useCaseParams))
+      .rejects
+      .toThrowError('DELETE_COMMENT_USE_CASE.COMMENT_NOT_OWNER');
+    expect(mockCommentRepository.findCommentById).toHaveBeenCalledWith('commentdel');
   });
 
   it('should orchestrating the delete comment action correctly', async () => {
     // Arrange
-    await UsersTableTestHelper.addUser({ username: 'exampleusernamedel', id: 'commentdel2' });
-    await ThreadTableTestHelper.addThread({ id: 'threaddel2-xx-x', owner: 'commentdel2' });
-    await CommentTableTestHelper.addComment({ id: 'commentdel2', userId: 'commentdel2', threadId: 'threaddel2-xx-x' });
     const useCaseParams = {
       commentId: 'commentdel2',
       owner: 'commentdel2',
@@ -95,9 +79,7 @@ describe('DeleteCommentUseCase', () => {
     }).execute(useCaseParams);
 
     // Assert
-    expect(mockCommentRepository.findCommentById).toHaveBeenCalledTimes(1);
     expect(mockCommentRepository.findCommentById).toHaveBeenCalledWith('commentdel2');
-    expect(mockCommentRepository.deleteComment).toHaveBeenCalledTimes(1);
     expect(mockCommentRepository.deleteComment).toHaveBeenCalledWith('commentdel2');
   });
 });

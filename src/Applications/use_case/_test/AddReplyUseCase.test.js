@@ -1,55 +1,23 @@
-const CommentRepository = require('../../../Domains/comments/CommentRepository');
 const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
+const CommentRepository = require('../../../Domains/comments/CommentRepository');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const AddReply = require('../../../Domains/replies/entities/AddReply');
 const AddedReply = require('../../../Domains/replies/entities/AddedReply');
 const AddReplyUseCase = require('../AddReplyUseCase');
-const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
-const ThreadTableTestHelper = require('../../../../tests/ThreadTableTestHelper');
-const CommentTableTestHelper = require('../../../../tests/CommentTableTestHelper');
-const ReplyTableTestHelper = require('../../../../tests/ReplyTableTestHelper');
 
 describe('AddReplyUseCase', () => {
-  afterEach(async () => {
-    await ThreadTableTestHelper.cleanTable();
-    await CommentTableTestHelper.cleanTable();
-    await UsersTableTestHelper.cleanTable();
-    await ReplyTableTestHelper.cleanTable();
-  });
-
-  it('should throw error if use case not contain param thread id', () => {
-    const useCasePayload = {
-      content: 'content',
-      commentId: 'commentId',
-      owner: 'user-222',
-    };
-
+  it('should throw error if use case not contain needed property', () => {
     const useCase = new AddReplyUseCase({});
 
-    expect(() => useCase.execute(useCasePayload))
+    expect(() => useCase.execute({}))
       .rejects
-      .toThrowError('ADD_REPLY_USE_CASE.NOT_CONTAIN_CONTENT');
+      .toThrowError('ADD_REPLY_USE_CASE.NOT_CONTAIN_NEEDED_PROPERTY');
   });
 
-  it('should throw error if use case not contain param comment id', () => {
+  it('should throw error if use case not meet data type specification', () => {
     // Arrange
     const useCasePayload = {
-      content: 'content',
-      owner: 'user-222',
-      threadId: 'thread-123-xx',
-    };
-    const addReplyUseCase = new AddReplyUseCase({});
-
-    // Action & Assert
-    expect(() => addReplyUseCase.execute(useCasePayload))
-      .rejects
-      .toThrowError('ADD_REPLY_USE_CASE.NOT_CONTAIN_CONTENT');
-  });
-
-  it('should throw error if use case not param thread id & comment id not string', () => {
-    // Arrange
-    const useCasePayload = {
-      content: 'content',
+      content: 1212,
       owner: 'user-222',
       threadId: 34,
       commentId: 1,
@@ -76,7 +44,7 @@ describe('AddReplyUseCase', () => {
 
     /** mocking needed function */
     mockThreadRepository.checkThreadById = jest.fn()
-      .mockImplementation(() => Promise.resolve(null));
+      .mockImplementation(() => Promise.resolve());
 
     const addReplyUseCase = new AddReplyUseCase({
       threadRepository: mockThreadRepository,
@@ -86,16 +54,15 @@ describe('AddReplyUseCase', () => {
     expect(() => addReplyUseCase.execute(useCasePayload))
       .rejects
       .toThrowError('ADD_REPLY_USE_CASE.THREAD_NOT_FOUND');
+    expect(mockThreadRepository.checkThreadById).toHaveBeenCalledWith('threadId');
   });
 
   it('should throw error if use case comment id not found', async () => {
     // Arrange
-    await UsersTableTestHelper.addUser({ id: 'user-222881', username: 'testaddreply' });
-    await ThreadTableTestHelper.addThread({ id: 'thread-123-xxl', title: 'thread title', owner: 'user-222881' });
     const useCasePayload = {
       content: 'content',
       owner: 'user-222',
-      threadId: 'thread-123-xxl',
+      threadId: 'threadId',
       commentId: 'commentId',
     };
 
@@ -105,28 +72,24 @@ describe('AddReplyUseCase', () => {
 
     /** mocking needed function */
     mockThreadRepository.checkThreadById = jest.fn()
-      .mockImplementation(() => Promise.resolve({ id: 'thread-123-xxl' }));
+      .mockImplementation(() => Promise.resolve({ id: 'threadId' }));
     mockCommentRepository.findCommentById = jest.fn()
-      .mockImplementation(() => Promise.resolve(null));
+      .mockImplementation(() => Promise.resolve());
 
     const addReplyUseCase = new AddReplyUseCase({
-      threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
+      threadRepository: mockThreadRepository,
     });
 
-    // Action & Assert
+    // Actions & Assert
     expect(() => addReplyUseCase.execute(useCasePayload))
       .rejects
       .toThrowError('ADD_REPLY_USE_CASE.COMMENT_NOT_FOUND');
+    expect(mockThreadRepository.checkThreadById).toHaveBeenCalledWith('threadId');
   });
 
   it('should orchestrating the add reply action correctly', async () => {
     // Arrange
-    await UsersTableTestHelper.addUser({ id: 'user-22288', username: 'testaddreplyxx' });
-    await ThreadTableTestHelper.addThread({ id: 'thread-123-xxs', title: 'thread title', owner: 'user-22288' });
-    await CommentTableTestHelper.addComment({
-      id: 'comment-123-xxx', threadId: 'thread-123-xxs', content: 'comment content', userId: 'user-22288',
-    });
     const useCasePayload = {
       commentId: 'comment-123-xxx',
       content: 'reply content',
@@ -153,7 +116,11 @@ describe('AddReplyUseCase', () => {
     mockCommentRepository.findCommentById = jest.fn()
       .mockImplementation(() => Promise.resolve({ id: 'comment-123-xxx' }));
     mockReplyRepository.addReply = jest.fn()
-      .mockImplementation(() => Promise.resolve(expecttedReply));
+      .mockImplementation(() => Promise.resolve(new AddedReply({
+        id: 'reply-123',
+        content: useCasePayloadReply.content,
+        owner: 'user-22288',
+      })));
 
     const addReplyUseCase = new AddReplyUseCase({
       replyRepository: mockReplyRepository,
