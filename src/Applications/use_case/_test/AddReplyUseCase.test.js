@@ -86,6 +86,7 @@ describe('AddReplyUseCase', () => {
       .rejects
       .toThrowError('ADD_REPLY_USE_CASE.COMMENT_NOT_FOUND');
     expect(mockThreadRepository.checkThreadById).toHaveBeenCalledWith('threadId');
+    expect(mockCommentRepository.findCommentById).toHaveBeenCalledWith('commentId'); // error disini
   });
 
   it('should orchestrating the add reply action correctly', async () => {

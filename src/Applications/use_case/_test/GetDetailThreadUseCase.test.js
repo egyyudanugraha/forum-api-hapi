@@ -5,22 +5,22 @@ const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
 const GetThread = require('../../../Domains/threads/entities/GetThread');
 
 describe('GetDetailThreadUseCase', () => {
-  it('should throw if not contain threadId', async () => {
+  it('should throw if not contain threadId', () => {
     // Arrange
     const useCase = new GetDetailThreadUseCase({});
 
     // Action & Assert
-    await expect(useCase.execute({}))
+    expect(useCase.execute({}))
       .rejects
       .toThrowError('GET_DETAIL_THREAD_USE_CASE.NOT_CONTAIN_THREAD_ID');
   });
 
-  it('should throw if payload not meet data type specification', async () => {
+  it('should throw if payload not meet data type specification', () => {
     // Arrange
     const useCase = new GetDetailThreadUseCase({});
 
     // Action & Assert
-    await expect(useCase.execute({ threadId: 121 }))
+    expect(useCase.execute({ threadId: 121 }))
       .rejects
       .toThrowError('GET_DETAIL_THREAD_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION');
   });
@@ -49,6 +49,215 @@ describe('GetDetailThreadUseCase', () => {
     expect(mockThreadRepository.checkThreadById).toHaveBeenCalledWith('threadId');
   });
 
+  it('should return replies mapped', () => {
+    // Arrange
+    const useCase = new GetDetailThreadUseCase({});
+    const replies = [
+      {
+        id: 'replyId',
+        content: 'replyContent',
+        date: 'replyDate',
+        username: 'replyUsername',
+        is_delete: false,
+      },
+      {
+        id: 'replyId2',
+        content: 'replyContent2',
+        date: 'replyDate2',
+        username: 'replyUsername2',
+        is_delete: true,
+      },
+    ];
+
+    const expectedReplies = [
+      {
+        id: 'replyId',
+        content: 'replyContent',
+        date: 'replyDate',
+        username: 'replyUsername',
+      },
+      {
+        id: 'replyId2',
+        content: '**balasan telah dihapus**',
+        date: 'replyDate2',
+        username: 'replyUsername2',
+      },
+    ];
+
+    // Action
+    const result = useCase._repliesMapping(replies);
+
+    // Assert
+    expect(result).toStrictEqual(expectedReplies);
+  });
+
+  it('should return comments mapped', async () => {
+    // Arrange
+    const comments = [
+      {
+        id: 'commentId',
+        content: 'commentContent',
+        date: 'commentDate',
+        username: 'commentUsername',
+        is_delete: true,
+      },
+      {
+        id: 'commentId2',
+        content: 'commentContent2',
+        date: 'commentDate2',
+        username: 'commentUsername2',
+        is_delete: false,
+      },
+    ];
+
+    const expectedComments = [
+      {
+        id: 'commentId',
+        content: '**komentar telah dihapus**',
+        date: 'commentDate',
+        username: 'commentUsername',
+        replies: [],
+      },
+      {
+        id: 'commentId2',
+        content: 'commentContent2',
+        date: 'commentDate2',
+        username: 'commentUsername2',
+        replies: [],
+      },
+    ];
+
+    /** creating dependency of use case */
+    const mockReplyRepository = new ReplyRepository();
+
+    /** mocking needed function */
+    mockReplyRepository.findReplyByCommentId = jest.fn()
+      .mockImplementation(() => ([]));
+
+    const getDetailThreadUseCase = new GetDetailThreadUseCase({
+      replyRepository: mockReplyRepository,
+    });
+
+    // Action
+    const result = await Promise.all(getDetailThreadUseCase._commentsMapping(comments));
+
+    // Assert
+    expect(result).toStrictEqual(expectedComments);
+    expect(mockReplyRepository.findReplyByCommentId).toHaveBeenCalledTimes(2);
+  });
+
+  it('should return thread mapped with comment and replies', async () => {
+    // Arrange
+    const thread = {
+      id: 'threadId',
+      title: 'threadTitle',
+      content: 'threadContent',
+      date: 'threadDate',
+      username: 'threadUsername',
+    };
+
+    const comments = [
+      {
+        id: 'commentId',
+        content: 'commentContent',
+        date: 'commentDate',
+        username: 'commentUsername',
+        is_delete: true,
+      },
+      {
+        id: 'commentId2',
+        content: 'commentContent2',
+        date: 'commentDate2',
+        username: 'commentUsername2',
+        is_delete: false,
+      },
+    ];
+
+    const expectedThread = {
+      id: 'threadId',
+      title: 'threadTitle',
+      content: 'threadContent',
+      date: 'threadDate',
+      username: 'threadUsername',
+      comments: [
+        {
+          id: 'commentId',
+          content: '**komentar telah dihapus**',
+          date: 'commentDate',
+          username: 'commentUsername',
+          replies: [
+            {
+              id: 'replyId',
+              content: 'replyContent',
+              date: 'replyDate',
+              username: 'replyUsername',
+            },
+            {
+              id: 'replyId2',
+              content: '**balasan telah dihapus**',
+              date: 'replyDate2',
+              username: 'replyUsername2',
+            },
+          ],
+        },
+        {
+          id: 'commentId2',
+          content: 'commentContent2',
+          date: 'commentDate2',
+          username: 'commentUsername2',
+          replies: [
+            {
+              id: 'replyId',
+              content: 'replyContent',
+              date: 'replyDate',
+              username: 'replyUsername',
+            },
+            {
+              id: 'replyId2',
+              content: '**balasan telah dihapus**',
+              date: 'replyDate2',
+              username: 'replyUsername2',
+            },
+          ],
+        },
+      ],
+    };
+
+    /** creating dependency of use case */
+    const mockReplyRepository = new ReplyRepository();
+
+    /** mocking needed function */
+    mockReplyRepository.findReplyByCommentId = jest.fn()
+      .mockImplementation(() => ([
+        {
+          id: 'replyId',
+          content: 'replyContent',
+          date: 'replyDate',
+          username: 'replyUsername',
+        },
+        {
+          id: 'replyId2',
+          content: '**balasan telah dihapus**',
+          date: 'replyDate2',
+          username: 'replyUsername2',
+        },
+      ]));
+
+    const getDetailThreadUseCase = new GetDetailThreadUseCase({
+      replyRepository: mockReplyRepository,
+    });
+
+    // Action
+    const result = await getDetailThreadUseCase._combineTheradWithCommentReplies({
+      thread,
+      comments,
+    });
+
+    // Assert
+    expect(result).toStrictEqual(expectedThread);
+    expect(mockReplyRepository.findReplyByCommentId).toHaveBeenCalledTimes(2);
+  });
+
   it('should orchestrating the get detail thread action correctly', async () => {
     // Arrange
     const useCasePayload = {
@@ -63,7 +272,7 @@ describe('GetDetailThreadUseCase', () => {
       comments: [
         {
           id: 'comment-xxx-xx',
-          content: 'comment content',
+          content: '**komentar telah dihapus**',
           date: expect.any(String),
           username: 'user-thread-xxx',
           replies: [
@@ -101,6 +310,7 @@ describe('GetDetailThreadUseCase', () => {
           content: 'comment content',
           date: expect.any(String),
           username: 'user-thread-xxx',
+          is_delete: true,
         },
       ]));
     mockReplyRepository.findReplyByCommentId = jest.fn()
@@ -110,6 +320,7 @@ describe('GetDetailThreadUseCase', () => {
           content: 'reply content',
           date: expect.any(String),
           username: 'user-thread-xxx',
+          is_delete: false,
         },
       ]));
 
