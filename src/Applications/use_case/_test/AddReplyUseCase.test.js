@@ -82,11 +82,11 @@ describe('AddReplyUseCase', () => {
     });
 
     // Actions & Assert
-    expect(() => addReplyUseCase.execute(useCasePayload))
+    await expect(() => addReplyUseCase.execute(useCasePayload))
       .rejects
       .toThrowError('ADD_REPLY_USE_CASE.COMMENT_NOT_FOUND');
     expect(mockThreadRepository.checkThreadById).toHaveBeenCalledWith('threadId');
-    expect(mockCommentRepository.findCommentById).toHaveBeenCalledWith('commentId'); // error disini
+    expect(mockCommentRepository.findCommentById).toHaveBeenCalledWith('commentId');
   });
 
   it('should orchestrating the add reply action correctly', async () => {
