@@ -39,7 +39,7 @@ class GetDetailThreadUseCase {
   async _combineTheradWithCommentReplies({ thread, comments }) {
     return {
       ...thread,
-      comments: await Promise.all(this._commentsMapping(comments)),
+      comments: await this._commentsMapping(comments),
     };
   }
 
@@ -52,13 +52,17 @@ class GetDetailThreadUseCase {
     }));
   }
 
-  _commentsMapping(comments) {
-    return comments.map(async (comment) => ({
+  async _commentsMapping(comments) {
+    const commentIds = comments.map((comment) => comment.id);
+    const replies = await this._replyRepository.findReplyByCommentId(commentIds);
+
+    return comments.map((comment) => ({
       id: comment.id,
       content: comment.is_delete ? '**komentar telah dihapus**' : comment.content,
       date: comment.date,
       username: comment.username,
-      replies: this._repliesMapping(await this._replyRepository.findReplyByCommentId(comment.id)),
+      likeCount: Number(comment.likecount),
+      replies: this._repliesMapping(replies.filter((reply) => reply.comment_id === comment.id)),
     }));
   }
 }
