@@ -9,14 +9,12 @@ exports.up = (pgm) => {
       notNull: true,
       references: 'users(id)',
       onDelete: 'CASCADE',
-      unique: true,
     },
     comment_id: {
       type: 'VARCHAR(50)',
       notNull: true,
       references: 'comment_threads(id)',
       onDelete: 'CASCADE',
-      unique: true,
     },
   });
 };

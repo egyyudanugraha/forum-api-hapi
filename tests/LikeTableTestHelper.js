@@ -31,7 +31,7 @@ const LikeTableTestHelper = {
     };
 
     const result = await pool.query(query);
-    return result.rows[0].count;
+    return Number(result.rows[0].count);
   },
 
   async cleanTable() {

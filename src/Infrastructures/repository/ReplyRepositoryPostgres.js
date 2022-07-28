@@ -44,11 +44,10 @@ class ReplyRepositoryPostgres extends ReplyRepository {
 
   async findReplyByCommentId(commentId) {
     const query = {
-      text: `SELECT replies.id, replies.content, 
-      replies.date, replies.is_delete, users.username
+      text: `SELECT replies.*, users.username
       FROM replies
-      LEFT JOIN users ON replies.owner = users.id
-      WHERE replies.comment_id = $1
+      INNER JOIN users ON users.id = replies.owner
+      WHERE replies.comment_id = ANY($1::text[])
       GROUP BY replies.id, users.username
       ORDER BY replies.date ASC`,
       values: [commentId],

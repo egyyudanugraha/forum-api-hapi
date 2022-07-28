@@ -35,7 +35,7 @@ describe('LikeRepository postgres', () => {
       await likeRepository.addLike(likePayload);
 
       const likes = await LikeTableTestHelper.countLikes('comment-like-123');
-      expect(likes).toStrictEqual('1');
+      expect(likes).toStrictEqual(1);
     });
   });
 
@@ -46,37 +46,39 @@ describe('LikeRepository postgres', () => {
       await CommentTableTestHelper.addComment({
         id: 'comment-like-1234', content: 'comment content', threadId: 'thread-like-123', userId: 'user-like-1234',
       });
-      await LikeTableTestHelper.addLike({
+      const payload = {
         commentId: 'comment-like-1234',
         userId: 'user-like-1234',
-      });
+      };
+      await LikeTableTestHelper.addLike(payload);
 
       const fakeIdGenerator = () => 123; // stub
       const likeRepository = new LikeRepositoryPostgres(pool, fakeIdGenerator);
 
-      await likeRepository.removeLike('user-like-1234', 'comment-like-1234');
+      await likeRepository.removeLike(payload);
 
       const likes = await LikeTableTestHelper.countLikes('comment-like-1234');
-      expect(likes).toStrictEqual('0');
+      expect(likes).toStrictEqual(0);
     });
   });
 
-  describe('verifyLikes function', () => {
+  describe('verifyLiked function', () => {
     it('should return like', async () => {
       await UsersTableTestHelper.addUser({ id: 'user-like-1235', username: 'userlike' });
       await ThreadTableTestHelper.addThread({ id: 'thread-like-123', title: 'thread title', owner: 'user-like-1235' });
       await CommentTableTestHelper.addComment({
         id: 'comment-like-1235', content: 'comment content', threadId: 'thread-like-123', userId: 'user-like-1235',
       });
-      await LikeTableTestHelper.addLike({
+      const payload = {
         commentId: 'comment-like-1235',
         userId: 'user-like-1235',
-      });
+      };
+      await LikeTableTestHelper.addLike(payload);
 
       const fakeIdGenerator = () => 123; // stub
       const likeRepository = new LikeRepositoryPostgres(pool, fakeIdGenerator);
 
-      const like = await likeRepository.verifyLikes('user-like-1235', 'comment-like-1235');
+      const like = await likeRepository.verifyLiked(payload);
 
       expect(like).toStrictEqual({ id: 'like-123' });
     });
@@ -99,7 +101,7 @@ describe('LikeRepository postgres', () => {
 
       const likes = await likeRepository.countLikes('comment-like-1236');
 
-      expect(likes).toStrictEqual('1');
+      expect(likes).toStrictEqual(1);
     });
   });
 });

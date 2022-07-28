@@ -4,11 +4,11 @@ class LikeRepository {
     throw new Error('LIKE_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 
-  async removeLike(userId, commentId) {
+  async removeLike(likePayload) {
     throw new Error('LIKE_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 
-  async verifyLikes(userId, commentId) {
+  async verifyLiked(likePayload) {
     throw new Error('LIKE_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 

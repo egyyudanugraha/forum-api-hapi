@@ -20,7 +20,10 @@ class CommentRepositoryPostgres extends LikeRepository {
     await this._pool.query(query);
   }
 
-  async removeLike(userId, commentId) {
+  async removeLike(likePayload) {
+    const {
+      commentId, userId,
+    } = likePayload;
     const query = {
       text: 'DELETE FROM like_comments WHERE user_id = $1 AND comment_id = $2',
       values: [userId, commentId],
@@ -29,7 +32,10 @@ class CommentRepositoryPostgres extends LikeRepository {
     await this._pool.query(query);
   }
 
-  async verifyLikes(userId, commentId) {
+  async verifyLiked(likePayload) {
+    const {
+      commentId, userId,
+    } = likePayload;
     const query = {
       text: 'SELECT id FROM like_comments WHERE user_id = $1 AND comment_id = $2',
       values: [userId, commentId],
@@ -46,7 +52,7 @@ class CommentRepositoryPostgres extends LikeRepository {
     };
 
     const result = await this._pool.query(query);
-    return result.rows[0].count;
+    return Number(result.rows[0].count);
   }
 }
 

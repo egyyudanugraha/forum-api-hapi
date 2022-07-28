@@ -144,6 +144,7 @@ describe('CommentRepository postgres', () => {
           username: 'usercomment789',
           date: expect.any(String),
           is_delete: false,
+          likecount: '0',
         },
       ]);
     });

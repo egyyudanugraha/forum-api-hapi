@@ -99,6 +99,7 @@ describe('GetDetailThreadUseCase', () => {
         content: 'commentContent',
         date: 'commentDate',
         username: 'commentUsername',
+        likecount: 0,
         is_delete: true,
       },
       {
@@ -106,6 +107,7 @@ describe('GetDetailThreadUseCase', () => {
         content: 'commentContent2',
         date: 'commentDate2',
         username: 'commentUsername2',
+        likecount: 1,
         is_delete: false,
       },
     ];
@@ -116,6 +118,7 @@ describe('GetDetailThreadUseCase', () => {
         content: '**komentar telah dihapus**',
         date: 'commentDate',
         username: 'commentUsername',
+        likeCount: 0,
         replies: [],
       },
       {
@@ -123,6 +126,7 @@ describe('GetDetailThreadUseCase', () => {
         content: 'commentContent2',
         date: 'commentDate2',
         username: 'commentUsername2',
+        likeCount: 1,
         replies: [],
       },
     ];
@@ -139,11 +143,11 @@ describe('GetDetailThreadUseCase', () => {
     });
 
     // Action
-    const result = await Promise.all(getDetailThreadUseCase._commentsMapping(comments));
+    const result = await getDetailThreadUseCase._commentsMapping(comments);
 
     // Assert
     expect(result).toStrictEqual(expectedComments);
-    expect(mockReplyRepository.findReplyByCommentId).toHaveBeenCalledTimes(2);
+    expect(mockReplyRepository.findReplyByCommentId).toHaveBeenCalledWith(['commentId', 'commentId2']);
   });
 
   it('should return thread mapped with comment and replies', async () => {
@@ -162,6 +166,7 @@ describe('GetDetailThreadUseCase', () => {
         content: 'commentContent',
         date: 'commentDate',
         username: 'commentUsername',
+        likecount: 0,
         is_delete: true,
       },
       {
@@ -169,6 +174,7 @@ describe('GetDetailThreadUseCase', () => {
         content: 'commentContent2',
         date: 'commentDate2',
         username: 'commentUsername2',
+        likecount: 1,
         is_delete: false,
       },
     ];
@@ -185,18 +191,13 @@ describe('GetDetailThreadUseCase', () => {
           content: '**komentar telah dihapus**',
           date: 'commentDate',
           username: 'commentUsername',
+          likeCount: 0,
           replies: [
             {
               id: 'replyId',
               content: 'replyContent',
               date: 'replyDate',
               username: 'replyUsername',
-            },
-            {
-              id: 'replyId2',
-              content: '**balasan telah dihapus**',
-              date: 'replyDate2',
-              username: 'replyUsername2',
             },
           ],
         },
@@ -205,13 +206,8 @@ describe('GetDetailThreadUseCase', () => {
           content: 'commentContent2',
           date: 'commentDate2',
           username: 'commentUsername2',
+          likeCount: 1,
           replies: [
-            {
-              id: 'replyId',
-              content: 'replyContent',
-              date: 'replyDate',
-              username: 'replyUsername',
-            },
             {
               id: 'replyId2',
               content: '**balasan telah dihapus**',
@@ -234,12 +230,18 @@ describe('GetDetailThreadUseCase', () => {
           content: 'replyContent',
           date: 'replyDate',
           username: 'replyUsername',
+          is_delete: false,
+          owner: 'replyUsername',
+          comment_id: 'commentId',
         },
         {
           id: 'replyId2',
           content: '**balasan telah dihapus**',
           date: 'replyDate2',
           username: 'replyUsername2',
+          is_delete: true,
+          owner: 'replyUsername2',
+          comment_id: 'commentId2',
         },
       ]));
 
@@ -255,7 +257,7 @@ describe('GetDetailThreadUseCase', () => {
 
     // Assert
     expect(result).toStrictEqual(expectedThread);
-    expect(mockReplyRepository.findReplyByCommentId).toHaveBeenCalledTimes(2);
+    expect(mockReplyRepository.findReplyByCommentId).toHaveBeenCalledWith(['commentId', 'commentId2']);
   });
 
   it('should orchestrating the get detail thread action correctly', async () => {
@@ -275,6 +277,7 @@ describe('GetDetailThreadUseCase', () => {
           content: '**komentar telah dihapus**',
           date: expect.any(String),
           username: 'user-thread-xxx',
+          likeCount: 0,
           replies: [
             {
               id: 'reply-xxx-xx',
@@ -311,6 +314,7 @@ describe('GetDetailThreadUseCase', () => {
           date: expect.any(String),
           username: 'user-thread-xxx',
           is_delete: true,
+          likecount: 0,
         },
       ]));
     mockReplyRepository.findReplyByCommentId = jest.fn()
@@ -321,6 +325,8 @@ describe('GetDetailThreadUseCase', () => {
           date: expect.any(String),
           username: 'user-thread-xxx',
           is_delete: false,
+          owner: 'user-thread-123',
+          comment_id: 'comment-xxx-xx',
         },
       ]));
 
@@ -338,6 +344,6 @@ describe('GetDetailThreadUseCase', () => {
     expect(mockThreadRepository.checkThreadById).toHaveBeenCalledWith('thread-xxx');
     expect(mockThreadRepository.getDetailThreadById).toHaveBeenCalledWith('thread-xxx');
     expect(mockCommentRepository.findCommentByThreadId).toHaveBeenCalledWith('thread-xxx');
-    expect(mockReplyRepository.findReplyByCommentId).toHaveBeenCalledWith('comment-xxx-xx');
+    expect(mockReplyRepository.findReplyByCommentId).toHaveBeenCalledWith(['comment-xxx-xx']);
   });
 });

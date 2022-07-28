@@ -123,7 +123,7 @@ describe('ReplyRepository postgres', () => {
   describe('findRepliesByCommentId function', () => {
     it('should return empty array if no replies found', async () => {
       const replyRepository = new ReplyRepositoryPostgres(pool, {});
-      const replies = await replyRepository.findReplyByCommentId('comment-123');
+      const replies = await replyRepository.findReplyByCommentId(['comment-123']);
 
       expect(replies).toHaveLength(0);
     });
@@ -134,12 +134,18 @@ describe('ReplyRepository postgres', () => {
       await CommentTableTestHelper.addComment({
         id: 'comment-reply-23', content: 'comment content', threadId: 'thread-reply-23', userId: 'user-reply-231',
       });
+      await CommentTableTestHelper.addComment({
+        id: 'comment-reply-24', content: 'comment content', threadId: 'thread-reply-23', userId: 'user-reply-231',
+      });
       await ReplyTableTestHelper.addReply({
         id: 'reply-23', content: 'reply content', commentId: 'comment-reply-23', userId: 'user-reply-231',
       });
+      await ReplyTableTestHelper.addReply({
+        id: 'reply-24', content: 'reply content', commentId: 'comment-reply-24', userId: 'user-reply-231',
+      });
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
 
-      const replies = await replyRepositoryPostgres.findReplyByCommentId('comment-reply-23');
+      const replies = await replyRepositoryPostgres.findReplyByCommentId(['comment-reply-23', 'comment-reply-24']);
 
       expect(replies).toStrictEqual([
         {
@@ -148,6 +154,17 @@ describe('ReplyRepository postgres', () => {
           username: 'userreplies',
           date: expect.any(String),
           is_delete: false,
+          comment_id: 'comment-reply-23',
+          owner: 'user-reply-231',
+        },
+        {
+          id: 'reply-24',
+          content: 'reply content',
+          username: 'userreplies',
+          date: expect.any(String),
+          is_delete: false,
+          comment_id: 'comment-reply-24',
+          owner: 'user-reply-231',
         },
       ]);
     });
